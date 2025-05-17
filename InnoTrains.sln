@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35312.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnoTrains", "InnoTrains.csproj", "{B907B288-B481-4DE7-BF2B-8FBA06E3EE42}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F9DD2057-210E-447B-A035-B3985B98BAD8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnoSupabaseAuthentication", "..\SupabaseAuthentication\InnoSupabaseAuthentication.csproj", "{B5D4743A-9801-4021-9D96-CF0DC1E15CFA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B907B288-B481-4DE7-BF2B-8FBA06E3EE42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B907B288-B481-4DE7-BF2B-8FBA06E3EE42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B907B288-B481-4DE7-BF2B-8FBA06E3EE42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B907B288-B481-4DE7-BF2B-8FBA06E3EE42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5D4743A-9801-4021-9D96-CF0DC1E15CFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5D4743A-9801-4021-9D96-CF0DC1E15CFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5D4743A-9801-4021-9D96-CF0DC1E15CFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5D4743A-9801-4021-9D96-CF0DC1E15CFA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B907B288-B481-4DE7-BF2B-8FBA06E3EE42} = {F9DD2057-210E-447B-A035-B3985B98BAD8}
+		{B5D4743A-9801-4021-9D96-CF0DC1E15CFA} = {F9DD2057-210E-447B-A035-B3985B98BAD8}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D1536A45-36A5-4357-9AA8-CA0AB27056D0}
+	EndGlobalSection
+EndGlobal
