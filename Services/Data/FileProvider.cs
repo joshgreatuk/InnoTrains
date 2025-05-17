@@ -2,22 +2,24 @@
 
 namespace InnoTrains.Services.Data
 {
-	public class JSONFileProvider
+	public class FileProvider
 	{
-		private JSONFileOptions LobbyConfig { get; } = new JSONFileOptions()
+		private FileProviderOptions LobbyConfig { get; } = new FileProviderOptions()
 		{
+			Extension = "json",
 			PrefixPath = "Games",
 		};
 
-		private JSONFileOptions GameConfig { get; } = new JSONFileOptions()
+		private FileProviderOptions GameConfig { get; } = new FileProviderOptions()
 		{
+			Extension = "json",
 			PrefixPath = "Games",
 			SuffixPath = "Data"
 		};
 
-		private JSONFileOptions Config { get; }
+		private FileProviderOptions Config { get; }
 
-		public JSONFileProvider(JSONFileOptions config)
+		public FileProvider(FileProviderOptions config)
 		{
 			Config = config;
 		}
@@ -39,7 +41,7 @@ namespace InnoTrains.Services.Data
 		/// <param name="identifier"></param>
 		/// <param name="fileName"></param>
 		/// <returns></returns>
-		public string LoadJSON(string identifier, string fileName)
+		public string LoadFile(string identifier, string fileName)
 		{
 			if (!DoesFileExist(identifier, fileName))
 			{
@@ -55,9 +57,9 @@ namespace InnoTrains.Services.Data
 		/// <param name="identifier"></param>
 		/// <param name="fileName"></param>
 		/// <param name="data"></param>
-		public string[] LoadJSON(string identifier, string[] fileNames)
+		public string[] LoadFile(string identifier, string[] fileNames)
 		{
-			return fileNames.Select(fileName => LoadJSON(identifier, fileName)).ToArray();
+			return fileNames.Select(fileName => LoadFile(identifier, fileName)).ToArray();
 		}
 
 		/// <summary>
@@ -66,9 +68,9 @@ namespace InnoTrains.Services.Data
 		/// <param name="identifier"></param>
 		/// <param name="fileName"></param>
 		/// <param name="data"></param>
-		public string[] LoadJSON(string[] identifiers, string fileName)
+		public string[] LoadFile(string[] identifiers, string fileName)
 		{
-			return identifiers.Select(identifier => LoadJSON(identifier, fileName)).ToArray();
+			return identifiers.Select(identifier => LoadFile(identifier, fileName)).ToArray();
 		}
 
 		/// <summary>
@@ -77,14 +79,14 @@ namespace InnoTrains.Services.Data
 		/// <param name="identifier"></param>
 		/// <param name="fileName"></param>
 		/// <param name="data"></param>
-		public void SaveJSON(string identifier, string fileName, string data)
+		public void SaveFile(string identifier, string fileName, string data)
 		{
 			string path = GetFilePath(identifier, fileName);
 
 			string backupJSON = "";
 			if (DoesFileExist(identifier, fileName))
 			{
-				backupJSON = LoadJSON(identifier, fileName);
+				backupJSON = LoadFile(identifier, fileName);
 			}
 
 			try
@@ -108,7 +110,7 @@ namespace InnoTrains.Services.Data
 		/// <param name="identifier"></param>
 		/// <param name="fileName"></param>
 		/// <param name="data"></param>
-		public void SaveJSON(string identifiter, string[] fileNames, string[] data)
+		public void SaveFile(string identifiter, string[] fileNames, string[] data)
 		{
 			if (fileNames.Length != data.Length)
 			{
@@ -117,7 +119,7 @@ namespace InnoTrains.Services.Data
 
 			for (int i=0; i < fileNames.Length; i++)
 			{
-				SaveJSON(identifiter, fileNames[i], data[i]);
+				SaveFile(identifiter, fileNames[i], data[i]);
 			}
 		}
 
@@ -127,7 +129,7 @@ namespace InnoTrains.Services.Data
 		/// <param name="identifier"></param>
 		/// <param name="fileName"></param>
 		/// <param name="data"></param>
-		public void SaveJSON(string[] identifiers, string fileName, string[] data)
+		public void SaveFile(string[] identifiers, string fileName, string[] data)
 		{
 			if (identifiers.Length != data.Length)
 			{
@@ -136,7 +138,7 @@ namespace InnoTrains.Services.Data
 
 			for (int i = 0; i < identifiers.Length; i++)
 			{
-				SaveJSON(identifiers[i], fileName, data[i]);
+				SaveFile(identifiers[i], fileName, data[i]);
 			}
 		}
 

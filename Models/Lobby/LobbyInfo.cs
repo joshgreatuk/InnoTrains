@@ -1,4 +1,5 @@
 ﻿using InnoTrains.Models.Game;
+using System.Text.Json.Serialization;
 
 namespace InnoTrains.Models.Lobby
 {
@@ -32,6 +33,8 @@ namespace InnoTrains.Models.Lobby
 		/// </summary>
 		public string Owner { get; set; }
 
+		//NOTE: If JSONLobbyDataOptions.UseMultipleFiles is enabled, ignore this from the main lobby file
+		[JsonIgnore]
 		/// <summary>
 		/// Game settings to be passed to the engine
 		/// </summary>

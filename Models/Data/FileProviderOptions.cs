@@ -1,8 +1,8 @@
 ﻿namespace InnoTrains.Models.Data
 {
-	public class JSONFileOptions
+	public class FileProviderOptions
 	{
-		public string Extension { get; } = "json";
+		public required string Extension { get; set; }
 		public required string PrefixPath { get; set; }
 		public string SuffixPath { get; set; }
 	}

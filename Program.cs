@@ -30,7 +30,9 @@ namespace InnoTrains
 		{
 			services.Configure<EngineOptions>(_config.GetSection("InnoTrainsEngine"));
 			services.Configure<WebsocketEngineOptions>(_config.GetSection("WebsocketEngine"));
+
 			services.Configure<JSONGameDataOptions>(_config.GetSection("JSONGameDataProvider"));
+			services.Configure<JSONLobbyDataOptions>(_config.GetSection("JSONLobbyDataProvider"));
 
 			services.AddControllers();
 
