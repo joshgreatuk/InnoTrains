@@ -24,14 +24,20 @@ namespace InnoTrains.Models.Lobby
 		public bool IsPrivate { get; set; }
 
 		/// <summary>
-		/// The code used to directly join the lobby
+		/// The code used to directly join the lobby. Currently not implemented
 		/// </summary>
-		public string LobbyCode { get; set; }
+		//public string LobbyCode { get; set; }
 
 		/// <summary>
 		/// GUID of the lobby creator
 		/// </summary>
 		public string Owner { get; set; }
+
+		/// <summary>
+		/// A list of players registered to the game, either joined to public or given the GUID to join private
+		/// </summary>
+		public List<string> Players { get; set; }
+
 
 		//NOTE: If JSONLobbyDataOptions.UseMultipleFiles is enabled, ignore this from the main lobby file
 		[JsonIgnore]

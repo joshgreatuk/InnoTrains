@@ -4,20 +4,20 @@ namespace InnoTrains.Services.Data
 {
 	public class FileProvider
 	{
-		private FileProviderOptions LobbyConfig { get; } = new FileProviderOptions()
+		public static FileProviderOptions LobbyConfig { get; } = new FileProviderOptions()
 		{
 			Extension = "json",
 			PrefixPath = "Games",
 		};
 
-		private FileProviderOptions GameConfig { get; } = new FileProviderOptions()
+		public static FileProviderOptions GameConfig { get; } = new FileProviderOptions()
 		{
 			Extension = "json",
 			PrefixPath = "Games",
 			SuffixPath = "Data"
 		};
 
-		private FileProviderOptions Config { get; }
+		public FileProviderOptions Config { get; }
 
 		public FileProvider(FileProviderOptions config)
 		{
@@ -142,15 +142,45 @@ namespace InnoTrains.Services.Data
 			}
 		}
 
-		private string GetFilePath(string identifier, string fileName)
+		/// <summary>
+		/// File names should not include extension
+		/// </summary>
+		public void DeleteFile(string identifier, string fileName)
+		{
+			string filePath = GetFilePath(identifier, fileName);
+			if (!File.Exists(filePath))
+			{
+				return;
+			}
+
+			File.Delete(filePath);
+		}
+
+		public void DeleteFolder(string identifier)
+		{
+			string dirPath = GetDirectoryPath(identifier);
+			if (!Directory.Exists(dirPath))
+			{
+				return;
+			}
+
+			Directory.Delete(dirPath, true);
+		}
+
+		public string GetFilePath(string identifier, string fileName)
 		{
 			return GetDirectoryPath(identifier + $"/{fileName}.{Config.Extension}");
 		}
 		
 
-		private string GetDirectoryPath(string identifier)
+		public string GetDirectoryPath(string identifier)
 		{
-			return Directory.GetCurrentDirectory() + $"/{Config.PrefixPath}/{identifier}/{Config.SuffixPath}";
+			return 
+				Directory.GetCurrentDirectory() + 
+				$"/" +
+				$"{(Config.PrefixPath != null ? Config.PrefixPath + "/" : "")}" +
+				$"{(identifier != string.Empty ? identifier + "/" : "")}" +
+				$"{(Config.SuffixPath != string.Empty && identifier != string.Empty ? Config.SuffixPath + "/" : "")}";
 		}
 	}
 }
