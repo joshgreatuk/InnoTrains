@@ -18,10 +18,8 @@ namespace InnoTrains.Services.Data
 		/// <returns></returns>
 		public LobbyInfo LoadLobby(string guid, bool loadOptions);
 
-		public LobbyInfo DeleteLobby(string guid);
+		public void DeleteLobby(string guid);
 
-		public string[] GetPublicLobbies();
-
-		public LobbyInfo GetLobbyByGuid(string guid);
+		public LobbyInfo[] GetPublicLobbies();
 	}
 }

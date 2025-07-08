@@ -40,7 +40,7 @@ namespace InnoTrains.Models.Lobby
 
 
 		//NOTE: If JSONLobbyDataOptions.UseMultipleFiles is enabled, ignore this from the main lobby file
-		[JsonIgnore]
+		//[JsonIgnore] Handle as one file for now
 		/// <summary>
 		/// Game settings to be passed to the engine
 		/// </summary>

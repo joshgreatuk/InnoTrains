@@ -7,6 +7,8 @@ using InnoSupabaseAuthentication.Services;
 using InnoTrains.Models.Game;
 using InnoTrains.Models.Game.Networking;
 using InnoTrains.Models.Data;
+using InnoTrains.Services;
+using InnoTrains.Services.Data;
 
 namespace InnoTrains
 {
@@ -21,9 +23,14 @@ namespace InnoTrains
 			ConfigureServices(builder.Services);
 
 			var app = builder.Build();
+
+			Initialize(app.Services);
+
 			Configure(app, app.Environment);
 
 			app.Run();
+
+			Stop(app.Services);
 		}
 
 		private static void ConfigureServices(IServiceCollection services)
@@ -33,6 +40,9 @@ namespace InnoTrains
 
 			services.Configure<JSONGameDataOptions>(_config.GetSection("JSONGameDataProvider"));
 			services.Configure<JSONLobbyDataOptions>(_config.GetSection("JSONLobbyDataProvider"));
+
+			services.AddSingleton<JSONLobbyDataProvider>();
+			services.AddSingleton<LobbyService>();
 
 			services.AddControllers();
 
@@ -67,6 +77,38 @@ namespace InnoTrains
 			});
 
 			app.UseHsts();
+		}
+
+		private static void Initialize(IServiceProvider services)
+		{
+			foreach (IInitializable initService in services.GetServices<IInitializable>())
+			{
+				try
+				{
+					initService.Initialize();
+				}
+				catch (Exception)
+				{
+					Console.WriteLine($"There was an exception while initializing service: {initService.GetType().FullName}");
+					throw;
+				}
+			}
+		}
+
+		private static void Stop(IServiceProvider services)
+		{
+			foreach (IStopable stopService in services.GetServices<IStopable>())
+			{
+				try
+				{
+					stopService.Stop();
+				}
+				catch (Exception exception)
+				{
+					Console.WriteLine($"There was an exception while stopping service: {stopService.GetType().FullName}");
+					Console.WriteLine(exception);
+				}
+			}
 		}
 	}
 }

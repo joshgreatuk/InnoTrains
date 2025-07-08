@@ -5,6 +5,6 @@
 		/// <summary>
 		/// Split game data up by service
 		/// </summary>
-		public bool UseMultipleFiles { get; set; }
+		//public bool UseMultipleFiles { get; set; } No need for option, just JSONIgnore attribute in LobbyInfo
 	}
 }
