@@ -18,7 +18,7 @@ namespace InnoTrains.Services
 	/// - Exit (Shutdown method, after pause)
 	/// 
 	/// Since this is a multiplayer-focused engine there will always be a readonly reference to INetworkEngine
-	/// This will also be in the service collection but will need to be initialized and handled seperately from Init and Start
+	/// This will also be in the service collection but will need to be initialized and handled separately from Init and Start
 	/// 
 	/// Other services will be contained in an IServiceProvider
 	/// 

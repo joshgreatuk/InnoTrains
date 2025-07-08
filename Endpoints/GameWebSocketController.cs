@@ -1,8 +1,11 @@
-﻿using InnoTrains.Services.Game.Networking;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.WebSockets;
 using System.Text;
+using InnoSupabaseAuthentication.Services;
+using InnoTrains.Models.Lobby;
+using InnoTrains.Services;
+using Microsoft.Net.Http.Headers;
 
 namespace InnoTrains.Endpoints
 {
@@ -16,29 +19,52 @@ namespace InnoTrains.Endpoints
 	/// - When connection is closed, let INetworkEngine know, this will alert the lobby automagically
 	/// </summary>
 	[Authorize]
-	public class GameWebSocketController : Controller
+	public class GameWebSocketController(LobbyService lobbyService, AuthenticationService authService)  : Controller
 	{
-		private readonly IServiceProvider Services;
+		private readonly LobbyService _lobbyService = lobbyService;
+		private readonly AuthenticationService _authService = authService;
+		
 		private Queue<string> messageQueue = new();
 
-		public GameWebSocketController(IServiceProvider services) 
-		{
-			Services = services;
-		}
-
-		[Route("ws/game/{id}")]
-		public async Task<IActionResult> Get(string id)
+		[Route("ws/game/{lobbyGuid}")]
+		public async Task<IActionResult> Get(string lobbyGuid, [FromBody] string joinCode)
 		{
 			if (!HttpContext.WebSockets.IsWebSocketRequest)
 			{
 				return BadRequest();
 			}
 
-			//TODO: Do authentication
+			//Grab lobby information
+			LobbyInfo lobbyInfo = _lobbyService.GetLobbyInfo(lobbyGuid);
+			if (lobbyInfo == null)
+			{
+				return NotFound();
+			}
+			
+			//Do authentication
+			string userId = await _authService.GetUserId(Request.Headers[HeaderNames.Authorization]
+				.ToString().Split(" ").Last());
+			
+			//Check if player is already in list, let them in
+			if (!lobbyInfo.Players.Contains(userId))
+			{
+				//TODO: Implement max player limit
+					
+				//Check if join code is correct or lobby is public
+				if (lobbyInfo.IsPrivate && joinCode != lobbyInfo.LobbyCode && lobbyInfo.Owner != userId)
+				{
+					return Unauthorized("Lobby join code is incorrect");
+				}
 
-			//TODO: Grab lobby information
+				_lobbyService.AddLobbyPlayer(lobbyInfo.GUID, userId);
+			}
 
-			//TODO: Grab lobby INetworkEngine
+			//Grab lobby INetworkEngine
+			//If lobby isn't active, start it
+			if (lobbyInfo.NetworkEngine == null)
+			{
+				_lobbyService.StartLobby(lobbyInfo.GUID);
+			}
 
 			//Do websocket polling
 			using WebSocket websocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
@@ -69,7 +95,7 @@ namespace InnoTrains.Endpoints
 					continue;
 				}
 
-				//networkEngine.RecieveMessage(userId, resultMessage);
+				lobbyInfo.NetworkEngine.RecieveMessage(userId, resultMessage);
 			}
 
 			await websocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);

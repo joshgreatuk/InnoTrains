@@ -6,9 +6,16 @@
 	/// </summary>
 	public class GameOptions
 	{
+		public enum EmptyAction
+		{
+			None,
+			Pause,
+			Shutdown
+		}
+
 		/// <summary>
-		/// Should the lobby pause when empty
+		/// Whether the server should pause or shutdown when there are no players connected
 		/// </summary>
-		public bool PauseWhenEmpty { get; set; }
-	}
+		public EmptyAction LobbyEmptyAction { get; set; } = EmptyAction.Shutdown;
+	};
 }

@@ -3,43 +3,39 @@ using InnoTrains.Models.Lobby;
 using Microsoft.IdentityModel.Tokens;
 using System.IO;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace InnoTrains.Services.Data
 {
-	public class JSONLobbyDataProvider : ILobbyDataProvider, IInitializable
+	public class JsonLobbyDataProvider(JsonSerializerOptions serializerOptions, IOptions<JSONLobbyDataOptions> options) : ILobbyDataProvider, IInitializable
 	{
-		private readonly JSONLobbyDataOptions Options;
+		private readonly JsonSerializerOptions _serializerOptions = serializerOptions;
+		private readonly JSONLobbyDataOptions _options = options.Value;
 
-		public static FileProvider LobbyFileProvider { get; private set; }
+		public static FileProvider LobbyFileProvider { get; private set; } = new FileProvider(FileProvider.LobbyConfig);
 
-		private Dictionary<string, LobbyInfo> lobbies = new();
-
-		public JSONLobbyDataProvider(JSONLobbyDataOptions options)
-		{
-			LobbyFileProvider = new FileProvider(FileProvider.LobbyConfig);
-			Options = options;
-		}
-
+		private Dictionary<string, LobbyInfo> _lobbies = new();
+		
 		public void Initialize()
 		{
 			//Load lobbies
 			foreach (string folderName in Directory.GetDirectories(Directory.GetCurrentDirectory() + "/Games/"))
 			{
-				string lobbyJSON = LobbyFileProvider.LoadFile(folderName, "lobby");
-				LobbyInfo? lobby = JsonSerializer.Deserialize<LobbyInfo>(lobbyJSON);
+				string lobbyJson = LobbyFileProvider.LoadFile(folderName, "lobby");
+				LobbyInfo? lobby = JsonSerializer.Deserialize<LobbyInfo>(lobbyJson, _serializerOptions);
 				if (lobby == null)
 				{
 					Console.WriteLine($"Lobby '{folderName}' failed to deserialize");
 					continue;
 				}
 
-				lobbies.Add(lobby.GUID, lobby);
+				_lobbies.Add(lobby.GUID, lobby);
 			}
 		}
 
 		public LobbyInfo[] GetPublicLobbies()
 		{
-			return lobbies.Where(x => !x.Value.IsPrivate).Select(x => x.Value).ToArray();
+			return _lobbies.Where(x => !x.Value.IsPrivate).Select(x => x.Value).ToArray();
 
 			///For when lobbies must be stored on disk instead of in a dict
 			//List<string> lobbies = new();
@@ -54,19 +50,23 @@ namespace InnoTrains.Services.Data
 			//return lobbies.ToArray();
 		}
 
-		public LobbyInfo LoadLobby(string guid, bool loadOptions)
+		public LobbyInfo? LoadLobby(string guid, bool loadOptions)
 		{
 			//Grab lobby info
-			return lobbies.Where(x => x.Key == guid).FirstOrDefault().Value;
+			return _lobbies.Where(x => x.Key == guid).FirstOrDefault().Value;
+		}
+
+		public IEnumerable<LobbyInfo> GetLobbyEnumerable()
+		{
+			return _lobbies.Values.AsEnumerable();
 		}
 
 		public void SaveLobby(LobbyInfo lobby)
 		{
-			lobbies[lobby.GUID] = lobby;
+			_lobbies[lobby.GUID] = lobby;
 
 			//Create JSON
-			JsonSerializerOptions jsonOptions = new() { WriteIndented = true };
-			string jsonData = JsonSerializer.Serialize(lobby, typeof(LobbyInfo), jsonOptions);
+			string jsonData = JsonSerializer.Serialize(lobby, typeof(LobbyInfo), _serializerOptions);
 
 			LobbyFileProvider.SaveFile(lobby.GUID, "lobby", jsonData);
 		}
@@ -74,9 +74,9 @@ namespace InnoTrains.Services.Data
 		public void DeleteLobby(string guid)
 		{
 			//Remove lobby from provider
-			if (lobbies.ContainsKey(guid))
+			if (_lobbies.ContainsKey(guid))
 			{
-				lobbies.Remove(guid);
+				_lobbies.Remove(guid);
 			}
 
 			//Remove the JSON file, FileProvider has file existance protection

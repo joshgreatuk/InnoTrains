@@ -16,7 +16,9 @@ namespace InnoTrains.Services.Data
 		/// <param name="guid"></param>
 		/// <param name="loadOptions">Whether to load game options, if we are just checking the file, we don't need loadOptions</param>
 		/// <returns></returns>
-		public LobbyInfo LoadLobby(string guid, bool loadOptions);
+		public LobbyInfo? LoadLobby(string guid, bool loadOptions);
+		
+		public IEnumerable<LobbyInfo> GetLobbyEnumerable();
 
 		public void DeleteLobby(string guid);
 

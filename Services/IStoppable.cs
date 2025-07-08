@@ -1,6 +1,6 @@
 ﻿namespace InnoTrains.Services
 {
-	public interface IStopable
+	public interface IStoppable
 	{
 		public void Stop();
 	}

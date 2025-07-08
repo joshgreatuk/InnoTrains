@@ -3,6 +3,9 @@
 namespace InnoTrains.Services.Game.Networking
 {
 	/// <summary>
+	/// Methods using this attribute should have exactly the parameters:
+	/// (string lobbyGuid, string userGuid, string JsonData [Only if data is sent])
+	/// 
 	/// If used on a class, all methods in that class will append to that route
 	/// Inherited false as the INetworkEngine should iterate through inheritance itself
 	/// </summary>

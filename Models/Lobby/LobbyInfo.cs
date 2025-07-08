@@ -1,5 +1,7 @@
 ﻿using InnoTrains.Models.Game;
 using System.Text.Json.Serialization;
+using InnoTrains.Services;
+using InnoTrains.Services.Game.Networking;
 
 namespace InnoTrains.Models.Lobby
 {
@@ -8,6 +10,18 @@ namespace InnoTrains.Models.Lobby
 	/// </summary>
 	public class LobbyInfo
 	{
+		public enum LobbyState
+		{
+			Closed,
+			Initialized,
+			Loading,
+			Running,
+			Paused,
+			
+		}
+		
+		#region JSON Fields
+		
 		/// <summary>
 		/// Lobby display name
 		/// </summary>
@@ -26,7 +40,7 @@ namespace InnoTrains.Models.Lobby
 		/// <summary>
 		/// The code used to directly join the lobby. Currently not implemented
 		/// </summary>
-		//public string LobbyCode { get; set; }
+		public string LobbyCode { get; set; }
 
 		/// <summary>
 		/// GUID of the lobby creator
@@ -45,5 +59,17 @@ namespace InnoTrains.Models.Lobby
 		/// Game settings to be passed to the engine
 		/// </summary>
 		public GameOptions GameOptions { get; set; }
+		
+		#endregion
+
+		#region Dynamic Fields
+
+		[JsonIgnore] public InnoTrainsEngine? GameEngine { get; set; }
+
+		[JsonIgnore] public INetworkEngine? NetworkEngine { get; set; }
+
+		[JsonIgnore] public LobbyState State { get; set; } = LobbyState.Closed;
+
+		#endregion
 	}
 }

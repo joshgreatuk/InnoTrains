@@ -8,9 +8,17 @@ using System.Xml.Linq;
 
 namespace InnoTrains.Services.Game.Networking
 {
-	public class WebsocketEngine : INetworkEngine
+	/// <summary>
+	/// Each lobby should have its own WebsocketEngine and it's own InnoGameEngine
+	/// </summary>
+	/// <param name="lobbyGuid"></param>
+	/// <param name="options"></param>
+	/// <param name="serializerOptions"></param>
+	public class WebsocketEngine(WebsocketEngineOptions options, JsonSerializerOptions serializerOptions, string lobbyGuid) : INetworkEngine
 	{
-		private readonly WebsocketEngineOptions Options;
+		private readonly string _lobbyGuid = lobbyGuid;
+		private readonly WebsocketEngineOptions _options = options;
+		private readonly JsonSerializerOptions _serializerOptions = serializerOptions;
 
 		public Dictionary<string, Action<string>> websocketClients = new();
 
@@ -20,11 +28,6 @@ namespace InnoTrains.Services.Game.Networking
 		//WebsocketEvent contains the event data in a JSON string and the message metadata
 		public Queue<WebsocketMessage> interactionQueue = new();
 		public Queue<WebsocketMessage> eventQueue = new();
-
-		public WebsocketEngine(WebsocketEngineOptions options)
-		{
-			Options = options;
-		}
 
 		#region Game Engine Methods
 		public void Start(IServiceProvider services)
@@ -76,7 +79,7 @@ namespace InnoTrains.Services.Game.Networking
 			//Queue an event to specific user
 			WebsocketMessage message = new(route, recieverId, SerializeEventData(rawMessage), isSuccess);
 
-			if (Options.RouteQueuePrefixes.Any(x => message.Route.StartsWith(x)))
+			if (_options.RouteQueuePrefixes.Any(x => message.Route.StartsWith(x)))
 			{
 				//Queue
 				eventQueue.Enqueue(message);
@@ -127,7 +130,7 @@ namespace InnoTrains.Services.Game.Networking
 			WebsocketMessage message = DeserializeMessage(rawMessage);
 			message.UserId = senderId;
 			
-			if (Options.RouteQueuePrefixes.Any(x => message.Route.StartsWith(x)))
+			if (_options.RouteQueuePrefixes.Any(x => message.Route.StartsWith(x)))
 			{
 				//Queue
 				interactionQueue.Enqueue(message);
@@ -167,7 +170,12 @@ namespace InnoTrains.Services.Game.Networking
 				try
 				{
 					NetworkEventInfo info = routeEvents[i];
-					info.Method.Invoke(info.Target, [message.UserId, message.Data]);
+					List<object> methodParams = new() { _lobbyGuid, message.UserId };
+					if (message.Data != string.Empty)
+					{
+						methodParams.Add(message.Data);
+					}
+					info.Method.Invoke(info.Target, methodParams.ToArray());
 				}
 				catch (Exception ex)
 				{
@@ -188,7 +196,7 @@ namespace InnoTrains.Services.Game.Networking
 		/// <returns></returns>
 		private string SerializeEventData(object rawMessage)
 		{
-			return JsonSerializer.Serialize(rawMessage, new JsonSerializerOptions() { WriteIndented = true });
+			return JsonSerializer.Serialize(rawMessage, _serializerOptions);
 		}
 
 		/// <summary>
@@ -198,7 +206,7 @@ namespace InnoTrains.Services.Game.Networking
 		/// <returns></returns>
 		private string SerializeMessage(WebsocketMessage message)
 		{
-			return JsonSerializer.Serialize(message, new JsonSerializerOptions() { WriteIndented = true });
+			return JsonSerializer.Serialize(message, _serializerOptions);
 		}
 
 		/// <summary>
@@ -208,7 +216,7 @@ namespace InnoTrains.Services.Game.Networking
 		/// <returns></returns>
 		private WebsocketMessage DeserializeMessage(string rawMessage)
 		{
-			return JsonSerializer.Deserialize<WebsocketMessage>(rawMessage, new JsonSerializerOptions() { WriteIndented = true });
+			return JsonSerializer.Deserialize<WebsocketMessage>(rawMessage, _serializerOptions);
 		}
 		#endregion
 
@@ -223,7 +231,7 @@ namespace InnoTrains.Services.Game.Networking
 
 			websocketClients.Add(clientId, sendAction);
 			BroadcastMessage("client_connected", clientId);
-			RecieveInteraction(new WebsocketMessage("client_connected", "", clientId));
+			RecieveInteraction(new WebsocketMessage("", "client_connected", clientId));
 		}
 
 		public void UnregisterClient(string clientId)
@@ -236,7 +244,7 @@ namespace InnoTrains.Services.Game.Networking
 
 			websocketClients.Remove(clientId);
 			BroadcastMessage("client_disconnected", clientId);
-			RecieveInteraction(new WebsocketMessage("client_disconnected", "", clientId));
+			RecieveInteraction(new WebsocketMessage("", "client_disconnected", clientId));
 		}
 		#endregion
 
@@ -352,6 +360,20 @@ namespace InnoTrains.Services.Game.Networking
 		}
 		#endregion
 
+		#region Client Methods
+
+		public int GetConnectedClientCount()
+		{
+			return websocketClients.Count;
+		}
+
+		public string[] GetConnectedClients()
+		{
+			return websocketClients.Keys.ToArray();
+		}
+
+		#endregion
+		
 		#region Init/Shutdown
 		public void Shutdown(string shutdownMessage)
 		{

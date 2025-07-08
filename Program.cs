@@ -1,8 +1,7 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Cryptography;
 using System.Text;
 using System.Reflection;
+using System.Text.Json;
 using InnoSupabaseAuthentication.Services;
 using InnoTrains.Models.Game;
 using InnoTrains.Models.Game.Networking;
@@ -21,7 +20,7 @@ namespace InnoTrains
 			var builder = WebApplication.CreateBuilder(args);
 			_config = builder.Configuration;
 			ConfigureServices(builder.Services);
-
+			
 			var app = builder.Build();
 
 			Initialize(app.Services);
@@ -35,18 +34,20 @@ namespace InnoTrains
 
 		private static void ConfigureServices(IServiceCollection services)
 		{
+			services.AddSingleton(new JsonSerializerOptions() { WriteIndented = true });
+			
 			services.Configure<EngineOptions>(_config.GetSection("InnoTrainsEngine"));
 			services.Configure<WebsocketEngineOptions>(_config.GetSection("WebsocketEngine"));
 
 			services.Configure<JSONGameDataOptions>(_config.GetSection("JSONGameDataProvider"));
 			services.Configure<JSONLobbyDataOptions>(_config.GetSection("JSONLobbyDataProvider"));
 
-			services.AddSingleton<JSONLobbyDataProvider>();
+			services.AddSingleton<ILobbyDataProvider, JsonLobbyDataProvider>();
 			services.AddSingleton<LobbyService>();
 
 			services.AddControllers();
 
-			Assembly authEndpointAssembly = Assembly.Load("SupabaseAuthentication.Endpoints");
+			Assembly authEndpointAssembly = Assembly.GetAssembly(typeof(InnoSupabaseAuthentication.Services.AuthenticationService));
 			services.AddMvc().AddApplicationPart(authEndpointAssembly).AddControllersAsServices();
 
 			services.AddAuthorization();
@@ -97,7 +98,7 @@ namespace InnoTrains
 
 		private static void Stop(IServiceProvider services)
 		{
-			foreach (IStopable stopService in services.GetServices<IStopable>())
+			foreach (IStoppable stopService in services.GetServices<IStoppable>())
 			{
 				try
 				{

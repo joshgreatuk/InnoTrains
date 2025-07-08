@@ -77,5 +77,8 @@
 
 		public void RegisterNetworkEvents(object target);
 		public void UnregisterNetworkEvents(object target);
+
+		public int GetConnectedClientCount();
+		public string[] GetConnectedClients();
 	}
 }
